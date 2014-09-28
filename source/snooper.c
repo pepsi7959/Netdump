@@ -6,7 +6,8 @@
 	Modified date : 28/09/2014
 	
 	Reversion history
-	1.0.0 Intialize.
+	1.0.1	Fixed bug get IP function.
+	1.0.0	Intialize.
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -52,11 +53,12 @@ getSrcIP(char *buffer, char *srcIP){
 	if(buffer == NULL){
 		return -1;
 	}
-	sprintf(srcIP,"%d.%d.%d.%d"
-		, buffer[12]
-		, buffer[13]
-		, buffer[14]
-		, buffer[15]);
+
+	sprintf(srcIP,"%u.%u.%u.%u"
+		, buffer[12]&0xff
+		, buffer[13]&0xff
+		, buffer[14]&0xff
+		, buffer[15]&0xff);
 	return 0;
 }
 
@@ -65,11 +67,12 @@ getDstIP(char *buffer, char *dstIP ){
 	if(buffer == NULL){
 		return -1;
 	}
-	sprintf(dstIP,"%d.%d.%d.%d"
-		, buffer[16]
-		, buffer[17]
-		, buffer[18]
-		, buffer[19]);
+
+	sprintf(dstIP,"%u.%u.%u.%u"
+		, buffer[16]&0xff
+		, buffer[17]&0xff
+		, buffer[18]&0xff
+		, buffer[19]&0xff);
 	return 0;
 }
 
