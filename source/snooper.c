@@ -6,6 +6,7 @@
 	Modified date : 28/09/2014
 	
 	Reversion history
+    1.0.2   Fixed bug memmem function.
 	1.0.1	Fixed bug get IP function.
 	1.0.0	Intialize.
 */
@@ -16,6 +17,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <errno.h>
+#include "NMstring.h"
 
 #define STREQ(a, b) (strcmp(a, b) == 0)
 
@@ -33,23 +35,23 @@ dec_to_hex(char c){
 }
 
 int 
-filter(char *buffer, int blen, char *str_filter, int len){
+filter(unsigned char *buffer, int blen, char *str_filter, int len){
 	if (str_filter[0] == 0)
 		return 1;
 #ifdef FILTER_ON
-	char *p = NULL;
+	unsigned char *p = NULL;
 	buffer[blen] = 0;
 	if(blen < 52 || 
-		(p = (char*) memmem(buffer+52, blen-52, str_filter, 4)) == NULL ){
+		(p = (unsigned char*) NM_memmem((char *)(buffer+52), blen-52, str_filter, 4)) == NULL ){
 		return 0;
 	}
-	printf("Match[%s]\n",p);
+	printf("Match[%s]\n",(char *)p);
 #endif
 	return 1;
 }
 
 int 
-getSrcIP(char *buffer, char *srcIP){
+getSrcIP(unsigned char *buffer, char *srcIP){
 	if(buffer == NULL){
 		return -1;
 	}
@@ -63,7 +65,7 @@ getSrcIP(char *buffer, char *srcIP){
 }
 
 int 
-getDstIP(char *buffer, char *dstIP ){
+getDstIP(unsigned char *buffer, char *dstIP ){
 	if(buffer == NULL){
 		return -1;
 	}
@@ -77,7 +79,7 @@ getDstIP(char *buffer, char *dstIP ){
 }
 
 int 
-getSrcPort(char *buffer){
+getSrcPort(unsigned char *buffer){
 	int port = 0;
 	port = 0x00ff & buffer[21];
 	port = port | (0xff00 & (buffer[20] << 8));
@@ -85,7 +87,7 @@ getSrcPort(char *buffer){
 }
 
 int 
-getDstPort(char *buffer){
+getDstPort(unsigned char *buffer){
 	int port = 0;
 	port = 0x00ff & buffer[23];
 	port = port | (0xff00 & (buffer[22] << 8));
@@ -105,7 +107,7 @@ filter_port(int port ){
 }
 
 void 
-dump(char *buffer, int len){
+dump(unsigned char *buffer, int len){
 	int i = 0, j = 0, Ishex = 1;
 	
 	for(i = 0; i < len; i++){
@@ -116,7 +118,7 @@ dump(char *buffer, int len){
 				printf(" ");
 			}
 			
-			if(((i+1) % 16 == 0) && i || (i+1 == len)){	
+			if((((i+1) % 16 == 0) && i) || (i+1 == len)){	
 				j = (i+1) % 16;	
 				if(j){
 					i = i-j;
@@ -171,7 +173,7 @@ getparam(int *fport, char *fdata, int *len, int argc, char *argv[]){
 		}
 		else if ( STREQ(argv[i],"-d")){
 			if( i+1 < argc){
-				sprintf(fdata,argv[i+1]);
+				sprintf(fdata,"%s", argv[i+1]);
 				*len = strlen(argv[i+1]);
 				i++;
 			}else{
@@ -188,7 +190,7 @@ getparam(int *fport, char *fdata, int *len, int argc, char *argv[]){
 
 int
 main(int argc, char *argv[] ) {
-	int i, recv_length, sockfd;
+	int recv_length, sockfd;
 	unsigned char buff[90000];
 	char dstIP[16];
 	char srcIP[16];
