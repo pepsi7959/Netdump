@@ -6,7 +6,8 @@
 	Modified date : 28/09/2014
 	
 	Reversion history
-    1.0.2   Fixed bug memmem function.
+	1.0.3	Fixed bug data filter len.
+    	1.0.2   Fixed bug memmem function.
 	1.0.1	Fixed bug get IP function.
 	1.0.0	Intialize.
 */
@@ -42,7 +43,7 @@ filter(unsigned char *buffer, int blen, char *str_filter, int len){
 	unsigned char *p = NULL;
 	buffer[blen] = 0;
 	if(blen < 52 || 
-		(p = (unsigned char*) NM_memmem((char *)(buffer+52), blen-52, str_filter, 4)) == NULL ){
+		(p = (unsigned char*) NM_memmem((char *)(buffer+52), blen-52, str_filter, len)) == NULL ){
 		return 0;
 	}
 	printf("Match[%s]\n",(char *)p);
